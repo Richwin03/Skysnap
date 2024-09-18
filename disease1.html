@@ -289,15 +289,7 @@
                     } else {
                         resultDiv.innerHTML += `<br><strong>Disease Details:</strong> No information available for ${diseaseName}.`;
                     }
-                    const reclassifyBtn = document.createElement('button');
-                            reclassifyBtn.textContent = "Muling Magklasipika";
-                            reclassifyBtn.style.marginTop = "20px";
-                            reclassifyBtn.onclick = () => {
-                                document.getElementById("main").removeChild(resultsDiv);
-                                classifyImage();
-                            };
-                            resultsDiv.appendChild(reclassifyBtn);
-
+                    
                 })
                 
                 .catch(error => {
