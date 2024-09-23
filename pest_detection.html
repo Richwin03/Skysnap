@@ -41,6 +41,10 @@
             gap: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+        
+        }
+        .back{
+            background-color: rgb(250, 82, 82);
         }
         button {
             padding: 10px 20px;
@@ -55,7 +59,7 @@
             max-width: 200px;
         }
         button:disabled {
-            background-color: #7186ff;
+            background-color: #787a00;
             cursor: not-allowed;
         }
         button:hover:not(:disabled) {
@@ -102,6 +106,7 @@
     </style>
 </head>
 <body>
+    <button onclick="history.back()" style="display: block; margin-left: auto;" class="back">Go Back</button>
 
     <h1>Pagklasipika Ng Mga Peste Sa Palayan</h1>
 
