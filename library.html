@@ -15,9 +15,7 @@
             margin: 0;
             padding: 0;
         }
-        .back{
-            background-color: rgb(250, 82, 82);
-        }
+        
         h1 {
             text-align: center;
             color: #0e0d0d;
@@ -41,6 +39,32 @@
     max-width: 100%;
     box-sizing: border-box;
 }
+.buttonb {
+    display: inline-block; /* Allows for padding and margin */
+    padding: 12px 24px; /* Vertical and horizontal padding */
+    background-color: red; /* Red background */
+    color: white; /* White text color */
+    font-size: 20px; /* Larger text size */
+     text-align: center; /* Center the text */
+    border-radius: 8px; /* Rounded corners */
+    border: none; /* No border */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s; /* Smooth transition */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds shadow for depth */
+    margin: 20px 0; /* Adds space above and below the button */
+}
+
+.buttonb:hover {
+    background-color: darkred; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+/* Align the button to the left */
+.right-align {
+    text-align: right; /* Aligns the content to the left */
+    padding-right: 20px;
+}
+
 
 .item {
     text-align: center;
@@ -84,7 +108,10 @@
     </style>
 </head>
 <body>
-    <button onclick="history.back()" style="display: block; margin-left: auto;" class="back">Go Back</button>
+    <div class="right-align">
+        <div class="buttonb" onclick="history.back()">Back</div>
+    </div>
+    
     <h1>Aklatan Ng Mga Sakit At Peste Sa Palayan</h1>
     <div class="pest"><p>Aklatan ng mga Peste sa Palayan</p></div>
     <div class="container">

@@ -23,11 +23,27 @@
                 height: 100vh; /* Set height to viewport height */
                 overflow-y: auto; /* Enable vertical scrolling */
             }
+            .logor {
+                text-align: center; /* Centers the text and inline elements */
+                position: relative; /* Allows for positioning child elements */
+            }
+
+            .logor img {
+                display: block; /* Removes inline spacing issues */
+                margin: 0 auto; /* Centers the image horizontally */
+                width: 150px;
+                height: 150px; /* Maintains the aspect ratio */
+                padding-top: 20px;
+                border-color: #45a049;
+                border: #333;
+            }
+
         .header {
             text-align: center;
             padding: 10px;
             background-color: rgba(255, 255, 255, 0.8);
             position: relative;
+            
         }
         .header img {
             max-width: 50px;
@@ -36,6 +52,7 @@
             margin: 5px 0 0;
             font-size: 1.5em;
             color: #333;
+            
         }
         .menu-icon {
             position: absolute;
@@ -82,7 +99,24 @@
             overflow-y: auto; /* Allow vertical scrolling */
             height: 100vh; /* Full height to enable vertical scrolling */
             box-sizing: border-box; /* Ensure padding is included in height */
+            position: relative;
+            
         }
+        
+         #main h1 {
+              text-align: center; /* Centers the text */
+                position: relative;
+                font-size: 40px;
+                
+            }
+
+            #main p {
+                text-align: justify; /* Justifies the text */
+                position: relative;
+                font-size: 20px;
+                
+            }
+
         .main-buttons {
             display: flex;
             flex-direction: column;
@@ -133,7 +167,6 @@
 <body>
 
     <div class="header">
-        <img src="src/drone.jpg" alt="Drone">
         <img src="src/logo1.jpg" alt="Drone">
         <img src="src/logo2.jpg" alt="Drone">
         <img src="src/logo3.jpg" alt="Drone">
@@ -148,7 +181,9 @@
         <a href="library.html">Aklatan ng mga Peste at Sakit</a>
     </div>
 
+    <div class="logor"><img src="src/drone.jpg" alt="Drone"></div> 
         <div id="main">
+           
             <h1>Magandang araw Ka-SkyFarmer!</h1>
             <p>Ang Skysnap ay isang espesyal na website na dinisenyo upang tulungan ang mga magsasaka sa pagsusuri ng kanilang mga palay na pananim. Ang layunin namin ay magbigay sa mga magsasaka ng mga kasangkapan na kailangan nila upang masubaybayan ang kalusugan ng kanilang mga pananim, tukuyin ang mga problema, at magbigay imporamasyon upang makatulong sa maaring gawin upang magkaroon ng magandang ani.</p>
             <p>Sa pamamagitan ng paggamit ng makabagong teknolohiya, pinadali ng Skysnap ang pagsusuri ng palay. Gaya ng ibang website ang Skysnap ay may limitasyon. Kaya lamang nitong sumuri at kumlasipika ng 8 karamdaman, 11 peste ng palay, 3 uri ng sira sa palay dulot ng kalamidad at kung ang palay ay maari ng anihin o hindi. Nawa ay magustuhan niyo aming handog.</p>
