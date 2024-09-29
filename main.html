@@ -10,7 +10,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('src/SKYSNAP_back.jpg') no-repeat center center fixed;
+            background: url('src/farm0.jpg') no-repeat center center fixed;
             background-size: cover;
             overflow-x: hidden;
         }
@@ -160,6 +160,7 @@
             color: #333;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Load TensorFlow.js -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0/dist/tf.min.js"></script>
     <!-- Load Teachable Machine Library -->
@@ -168,19 +169,37 @@
 <body>
 
     <div class="header">
-        <img src="src/logo1.jpg" alt="Drone">
-        <img src="src/logo2.jpg" alt="Drone">
-        <img src="src/logo3.jpg" alt="Drone">
+        <a href="https://www.facebook.com/MinSUITSocietyCCSMain?mibextid=LQQJ4d" target="_blank">
+            <img src="src/logo1.jpg" alt="Drone">
+        </a>
+        
+        <a href="https://www.facebook.com/mindorostateuccs?mibextid=LQQJ4d" target="_blank">
+            <img src="src/logo2.jpg" alt="Drone">
+        </a>
+        
+        <a href="https://www.facebook.com/TheMinSUOfficial?mibextid=LQQJ4d" target="_blank">
+            <img src="src/logo3.jpg" alt="Drone">
+        </a>
+        
         <img src="src/menu.jpg" alt="Menu Icon" class="menu-icon" onclick="openNav()">
     </div>
 
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-        <a href="#" onclick="goToRiceFieldStatus()">Kalagayan ng Palayan</a>
-        <a href="disease1.html">Pagtuklas ng Sakit</a>
-        <a href="pest_detection.html">Pagtuklas ng Peste</a>
-        <a href="library.html">Aklatan ng mga Peste at Sakit</a>
+        <a href="#" onclick="goToRiceFieldStatus()">
+            <i class="fas fa-seedling"></i> Kalagayan ng Palayan
+        </a>
+        <a href="disease1.html">
+            <i class="fas fa-disease"></i> Pagtuklas ng Sakit
+        </a>
+        <a href="pest_detection.html">
+            <i class="fas fa-bug"></i> Pagtuklas ng Peste
+        </a>
+        <a href="library.html">
+            <i class="fas fa-book"></i> Aklatan ng mga Peste/Sakit
+        </a>
     </div>
+    
 
     <div class="logor"><img src="src/drone.jpg" alt="Drone"></div> 
         <div id="main">
