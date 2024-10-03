@@ -5,6 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skynap</title>
     <meta name="mobile-web-app-capable" content="yes">
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4kYnLgUzzIZt1XUWL9DEQ5j-YhbE1C_0",
+            authDomain: "farm-monitoring-7d029.firebaseapp.com",
+            databaseURL: "https://farm-monitoring-7d029-default-rtdb.firebaseio.com",
+            projectId: "farm-monitoring-7d029",
+            storageBucket: "farm-monitoring-7d029.appspot.com",
+            messagingSenderId: "205970011096",
+            appId: "1:205970011096:web:5a0718eb27438d499af8ad"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        const database = firebase.database();
+        const storage = firebase.storage();
+    
+        // Display user email and profile picture
+        function displayUserProfile() {
+            const userEmail = "user@example.com"; // Replace with actual logic to get user email
+            const userId = "userId123"; // Replace with actual user ID
+    
+            // Display email
+            document.querySelector("#user-email span").textContent = userEmail;
+    
+            // Fetch profile picture from Firebase Storage
+            const profilePicRef = storage.ref(`profile_pictures/${userId}.jpg`);
+            profilePicRef.getDownloadURL()
+                .then((url) => {
+                    document.getElementById("profile-pic").src = url;
+                })
+                .catch((error) => {
+                    console.error("Error fetching profile picture:", error);
+                });
+        }
+    
+        // Upload profile photo
+        function uploadProfilePhoto() {
+            const fileInput = document.getElementById("upload-photo");
+            const file = fileInput.files[0];
+            const userId = "userId123"; // Replace with actual user ID
+    
+            if (file) {
+                const storageRef = storage.ref(`profile_pictures/${userId}.jpg`);
+                const uploadTask = storageRef.put(file);
+    
+                uploadTask.on("state_changed",
+                    (snapshot) => {
+                        // Handle progress here if needed
+                    },
+                    (error) => {
+                        console.error("Error uploading file:", error);
+                    },
+                    () => {
+                        // Get the download URL
+                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                            console.log("File available at", downloadURL);
+                            document.getElementById("profile-pic").src = downloadURL; // Update profile picture
+                        });
+                    }
+                );
+            } else {
+                alert("Please select a file to upload.");
+            }
+        }
+    
+        // Call this function to display the user profile when the page loads
+        window.onload = function() {
+            displayUserProfile();
+        };
+    </script>
+    
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -159,6 +236,63 @@
             font-size: 1em;
             color: #333;
         }
+                        /* profile.css */
+
+                .profile-section {
+                    padding: 15px;
+                    border-top: 1px solid #ccc;
+                    margin-top: 20px;
+                }
+
+                .profile-section h3 {
+                    font-size: 1.5em;
+                    margin-bottom: 10px;
+                    color: #333;
+                    text-align: center;
+                }
+
+                .profile-pic {
+                    width: 100px;
+                    height: 100px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    display: block;
+                    margin-bottom: 10px;
+                    align-items: center;
+                    align-content: center;
+                }
+
+                .profile-upload {
+                    display: block;
+                    margin-bottom: 10px;
+                    font-size: 1em;
+                    padding: 5px;
+                }
+
+                .profile-button {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 10px 15px;
+                    text-align: center;
+                    font-size: 1em;
+                    cursor: pointer;
+                    width: 100%;
+                }
+
+                .profile-button:hover {
+                    background-color: #45a049;
+                }
+
+                #user-email {
+                    margin-bottom: 10px;
+                    font-size: 1em;
+                }
+
+                #user-email span {
+                    font-weight: bold;
+                }
+
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Load TensorFlow.js -->
@@ -186,6 +320,16 @@
 
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+    
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <h3>User Profile</h3>
+            <img id="profile-pic" src="default-profile.jpg" alt="Profile Picture" class="profile-pic">
+            <p id="user-email"> <span></span></p>
+            <input type="file" id="upload-photo" accept="image/*" class="profile-upload">
+            <button class="profile-button" onclick="uploadProfilePhoto()">Upload Photo</button>
+        </div>
+    
         <a href="#" onclick="goToRiceFieldStatus()">
             <i class="fas fa-seedling"></i> Kalagayan ng Palayan
         </a>
@@ -198,7 +342,13 @@
         <a href="library.html">
             <i class="fas fa-book"></i> Aklatan ng mga Peste/Sakit
         </a>
+    
+        <!-- Logout Button -->
+        <a href="logout.html">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
     </div>
+    
     
 
     <div class="logor"><img src="src/drone.jpg" alt="Drone"></div> 
