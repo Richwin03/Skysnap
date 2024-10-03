@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skynap</title>
     <meta name="mobile-web-app-capable" content="yes">
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-database.js"></script>
-    <script>
-        
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+        <!-- Your custom script -->
+        <script>
+            // Firebase configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyD4kYnLgUzzIZt1XUWL9DEQ5j-YhbE1C_0",
                 authDomain: "farm-monitoring-7d029.firebaseapp.com",
@@ -26,97 +28,71 @@
             const auth = firebase.auth();
             const storage = firebase.storage();
 
-            // Display user email and profile picture
+            // Display user profile
             function displayUserProfile() {
-                auth.onAuthStateChanged((user) => {
-                    if (user) {
-                        const userEmail = user.email; // Get the logged-in user's email
-                        const userId = user.uid; // Get the logged-in user's ID
+                const userEmail = localStorage.getItem('email');
+                const userId = auth.currentUser ? auth.currentUser.uid : null; // Get user ID
 
-                        // Display email
-                        document.querySelector("#user-email span").textContent = userEmail;
+                // Display email
+                document.getElementById("email").textContent = userEmail;
 
-                        // Fetch profile picture from Firebase Storage
-                        const profilePicRef = storage.ref(`profile_pictures/${userId}.jpg`);
-                        profilePicRef.getDownloadURL()
-                            .then((url) => {
-                                document.getElementById("profile-pic").src = url; // Set the profile picture
-                            })
-                            .catch((error) => {
-                                console.error("Error fetching profile picture:", error);
-                                // Optionally set a default profile picture if not found
-                                document.getElementById("profile-pic").src = "default-profile.png"; // Replace with your default image path
-                            });
-                    } else {
-                        console.log("No user is signed in.");
-                    }
-                });
+                // Fetch profile picture from Firebase Storage
+                if (userId) {
+                    const profilePicRef = storage.ref(`profile_pictures/${userId}.jpg`);
+                    profilePicRef.getDownloadURL()
+                        .then((url) => {
+                            document.getElementById("profile-pic").src = url;
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching profile picture:", error);
+                        });
+                }
             }
 
             // Upload profile photo
-            function uploadProfilePhoto() {
+            document.getElementById('uploadBtn').addEventListener('click', function() {
                 const fileInput = document.getElementById("upload-photo");
                 const file = fileInput.files[0];
+                const userId = auth.currentUser ? auth.currentUser.uid : null; // Get user ID
 
-                auth.onAuthStateChanged((user) => {
-                    if (user && file) {
-                        const userId = user.uid; // Use the current user's ID
+                if (file && userId) {
+                    const storageRef = storage.ref(`profile_pictures/${userId}.jpg`);
+                    const uploadTask = storageRef.put(file);
 
-                        const storageRef = storage.ref(`profile_pictures/${userId}.jpg`);
-                        const uploadTask = storageRef.put(file);
+                    uploadTask.on("state_changed",
+                        (snapshot) => {
+                            // Handle progress here if needed
+                        },
+                        (error) => {
+                            console.error("Error uploading file:", error);
+                        },
+                        () => {
+                            // Get the download URL and update the profile picture
+                            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                                document.getElementById("profile-pic").src = downloadURL; // Update profile picture
+                            });
+                        }
+                    );
+                } else {
+                    alert("Please select a file to upload.");
+                }
+            });
 
-                        uploadTask.on("state_changed",
-                            (snapshot) => {
-                                // Handle progress here if needed
-                            },
-                            (error) => {
-                                console.error("Error uploading file:", error);
-                            },
-                            () => {
-                                // Get the download URL
-                                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                                    console.log("File available at", downloadURL);
-                                    document.getElementById("profile-pic").src = downloadURL; // Update profile picture
-                                });
-                            }
-                        );
-                    } else {
-                        alert("Please select a file to upload or log in.");
-                    }
+            // Logout function
+            function logout() {
+                auth.signOut().then(() => {
+                    localStorage.removeItem('email'); // Clear the stored email
+                    window.location.href = "index.html"; // Redirect to login page
+                }).catch((error) => {
+                    console.error("Error signing out: ", error);
                 });
             }
 
-            // Call this function to display the user profile when the page loads
+            // Call displayUserProfile when the page loads
             window.onload = function() {
                 displayUserProfile();
             };
-
-            // Sign in when button is clicked
-            const signInBtn = document.getElementById('signInBtn');
-            signInBtn.addEventListener('click', () => {
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(userCredential => {
-                        // Successful login
-                        console.log("User signed in: ", userCredential.user);
-                        window.location.href = "main.html"; // Redirect to main page
-                    })
-                    .catch(error => {
-                        // Display error message if sign-in fails
-                        document.getElementById('error-message').textContent = "Incorrect username or password.";
-                        console.error("Error signing in: ", error);
-                    });
-            });
-
-            // Check if user is already signed in
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    window.location.href = "main.html"; // Redirect to main page if user is already signed in
-                }
-            });
-    </script>
+        </script>
     
 
     <style>
@@ -295,9 +271,13 @@
                     object-fit: cover;
                     display: block;
                     margin-bottom: 10px;
-                    align-items: center;
-                    align-content: center;
+                    
+                    justify-content: center; /* Center horizontally */
+                    align-items: center;    /* Center vertically if needed */
+                    margin: 20px;          /* Add some margin if needed */
                 }
+
+                
 
                 .profile-upload {
                     display: block;
@@ -361,8 +341,8 @@
         <!-- Profile Section -->
         <div class="profile-section">
             <h3>User Profile</h3>
-            <img id="profile-pic" src="default-profile.jpg" alt="Profile Picture" class="profile-pic">
-            <p id="user-email"> <span></span></p>
+            <img id="profile-pic" src="default-profile.jpg" alt="fjkgjkfnjkfdngjkhgjnbfjbnjgk" class="profile-pic">
+            <p id="user-email"> email<span></span></p>
             <input type="file" id="upload-photo" accept="image/*" class="profile-upload">
             <button class="profile-button" onclick="uploadProfilePhoto()">Upload Photo</button>
         </div>
@@ -379,9 +359,10 @@
         <a href="library.html">
             <i class="fas fa-book"></i> Aklatan ng mga Peste/Sakit
         </a>
-    
+        <br>
+        <br>
         <!-- Logout Button -->
-        <a href="index.html">
+        <a href="index.html" style="text-align: center;">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>
     </div>
