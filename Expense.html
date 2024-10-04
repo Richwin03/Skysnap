@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Budget & Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+  
+
+    
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9f5e9; /* Soft green background for a farm feel */
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #3c763d; /* Dark green header */
+            color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        form {
+            background: #ffffff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            width: calc(100% - 22px); /* Adjust width for padding */
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #3c763d; /* Matching button color */
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2c662d; /* Darker green on hover */
+        }
+        .summary, .table-container, .chart-container {
+            background: #ffffff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #3c763d; /* Dark green header for table */
+            color: white;
+        }
+        #myChart {
+            width: 100%;
+            height: 400px;
+        }
+        @media print {
+            body * {
+                visibility: hidden; /* Hide everything */
+            }
+            .table-container, .table-container *, .chart-container, .chart-container * {
+                visibility: visible; /* Show only the table and chart */
+            }
+            .table-container, .chart-container {
+                position: absolute;
+                left: 0;
+                top: 0; /* Positioning the table and chart to the top left corner */
+            }
+            button {
+                display: none; /* Hide buttons when printing */
+            }
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    
+    <div class="container">
+        <form id="budget-form">
+            <h2>Set Budget</h2>
+            <input type="text" id="budget-category" placeholder="Budget Category" required>
+            <input type="number" id="budget-amount" placeholder="Enter Budget Amount" required>
+            <button type="submit">Set Budget</button>
+        </form>
+
+        <div class="summary">
+            <h2>Budget Summary</h2>
+            <p>Total Budget: <span id="total-budget">0</span></p>
+            <p>Total Expenses: <span id="total-expenses">0</span></p>
+            <p>Remaining Budget: <span id="remaining-budget">0</span></p>
+            <button id="print-button" onclick="printExpenses()">Print Expenses</button>
+        </div>
+
+        <form id="expense-form">
+            <h2>Add Expense</h2>
+            <input type="text" id="expense-source" placeholder="Expense Source" required>
+            <input type="text" id="expense-category" placeholder="Category" required>
+            <input type="number" id="expense-amount" placeholder="Amount" required>
+            <input type="date" id="expense-date" required>
+            <input type="text" id="expense-description" placeholder="Description" required>
+            <button type="submit">Add Expense</button>
+        </form>
+
+        <div class="chart-container">
+            <h2>Expenses Visualization</h2>
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <h2>Expense List</h2>
+            <table id="expense-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Source</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Expense rows will be added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const budgetForm = document.getElementById('budget-form');
+        const expenseForm = document.getElementById('expense-form');
+        const totalBudgetElem = document.getElementById('total-budget');
+        const totalExpensesElem = document.getElementById('total-expenses');
+        const remainingBudgetElem = document.getElementById('remaining-budget');
+        const expenseTableBody = document.getElementById('expense-table').getElementsByTagName('tbody')[0];
+
+        let totalBudget = 0;
+        let totalExpenses = 0;
+        const expensesByCategory = {};
+
+        budgetForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const budgetCategory = document.getElementById('budget-category').value;
+            const budgetAmount = parseFloat(document.getElementById('budget-amount').value);
+            if (!isNaN(budgetAmount) && budgetAmount > 0) {
+                totalBudget = budgetAmount;
+                totalBudgetElem.innerText = totalBudget.toFixed(2);
+                updateRemainingBudget();
+                budgetForm.reset();
+            }
+        });
+
+        expenseForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const expenseSource = document.getElementById('expense-source').value;
+            const expenseCategory = document.getElementById('expense-category').value;
+            const expenseAmount = parseFloat(document.getElementById('expense-amount').value);
+            const expenseDate = document.getElementById('expense-date').value;
+            const expenseDescription = document.getElementById('expense-description').value;
+
+            if (expenseSource && !isNaN(expenseAmount) && totalBudget > 0) {
+                // Add expense to Firestore
+                await db.collection('expenses').add({
+                    source: expenseSource,
+                    category: expenseCategory,
+                    amount: expenseAmount,
+                    date: expenseDate,
+                    description: expenseDescription,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                totalExpenses += expenseAmount;
+                totalExpensesElem.innerText = totalExpenses.toFixed(2);
+                updateRemainingBudget();
+                addExpenseToTable(expenseDate, expenseSource, expenseCategory, expenseAmount, expenseDescription);
+                updateExpenseChart(expenseCategory, expenseAmount);
+                expenseForm.reset();
+            }
+        });
+
+        function updateRemainingBudget() {
+            const remainingBudget = totalBudget - totalExpenses;
+            remainingBudgetElem.innerText = remainingBudget >= 0 ? remainingBudget.toFixed(2) : "Over Budget!";
+        }
+
+        function addExpenseToTable(date, source, category, amount, description) {
+            const newRow = expenseTableBody.insertRow();
+            newRow.innerHTML = `
+                <td>${date}</td>
+                <td>${source}</td>
+                <td>${category}</td>
+                <td>${amount.toFixed(2)}</td>
+                <td>${description}</td>
+            `;
+        }
+
+        function updateExpenseChart(category, amount) {
+            if (!expensesByCategory[category]) {
+                expensesByCategory[category] = 0;
+            }
+            expensesByCategory[category] += amount;
+            renderChart();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const categories = Object.keys(expensesByCategory);
+            const amounts = Object.values(expensesByCategory);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Expenses by Category',
+                        data: amounts,
+                        backgroundColor: 'rgba(60, 118, 61, 0.5)',
+                        borderColor: 'rgba(60, 118, 61, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function printExpenses() {
+            window.print();
+        }
+
+        // Function to load expenses on page load
+        async function loadExpenses() {
+            const snapshot = await db.collection('expenses').orderBy('timestamp').get();
+            snapshot.forEach(doc => {
+                const expense = doc.data();
+                addExpenseToTable(expense.date, expense.source, expense.category, expense.amount, expense.description);
+                updateExpenseChart(expense.category, expense.amount);
+                totalExpenses += expense.amount;
+            });
+            totalExpensesElem.innerText = totalExpenses.toFixed(2);
+            updateRemainingBudget();
+        }
+
+        // Load expenses when the page loads
+        loadExpenses();
+    </script>
+</body>
+</html>
